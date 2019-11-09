@@ -1,5 +1,6 @@
 JSON config format:
 
+```
 {
 	"HHMM": {
 		"Light": "0-7"
@@ -9,6 +10,7 @@ JSON config format:
 			,"0-255"
 		]
 		,"Intensity": "0.0-1.0"
-		,"Duration": "[seconds Integer]"
+		,"Duration": "[integer: seconds]"
 	}
 }
+```
