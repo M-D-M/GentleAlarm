@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-DEBUG_FLAG = False
+DEBUG_FLAG = True
 
 import json, os, sys, subprocess
 from datetime import datetime
+
 
 if DEBUG_FLAG:
     CURRENT_TIME = "0600"
@@ -12,8 +13,10 @@ else:
     CURRENT_TIME = datetime.now().strftime('%H:%M')
     TIMEOUT_LENGTH = 43200
 
+
 json_config_file = ''
 exit_code = 1
+
 
 def main():
     exit_code = 1
@@ -25,14 +28,13 @@ def main():
     if json_data is not None:
         color_data = ','.join(json_data['Color'])
         try:
-            subprocess.run([
+            subprocess.Popen([
                 'setBlinkt.py'
                 ,json_data['Light']
                 ,json_data['Intensity']
                 ,f'{color_data}'
                 ,json_data['Duration']
-            ]
-            ,timeout=TIMEOUT_LENGTH)
+            ])
 
             exit_code = 0
         except subprocess.TimeoutExpired:
@@ -45,7 +47,7 @@ def main():
         print(f'No json data found for {CURRENT_TIME}.')
 
     return(exit_code)
-        
+
 
 if __name__ == '__main__':
     if (len(sys.argv) > 1):
