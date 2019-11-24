@@ -10,7 +10,7 @@ if DEBUG_FLAG:
     CURRENT_TIME = "0600"
     TIMEOUT_LENGTH = 180
 else:
-    CURRENT_TIME = datetime.now().strftime('%H:%M')
+    CURRENT_TIME = datetime.now().strftime('%H%M')
     TIMEOUT_LENGTH = 43200
 
 
