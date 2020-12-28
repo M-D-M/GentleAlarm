@@ -1,17 +1,13 @@
 #!/usr/bin/python3
 
-
+import logging
 from sys import argv
 from time import sleep
 from blinkt import set_pixel, set_brightness, show, clear
 
 
-DEBUG = True
-
-
 def setBlinktLight(light_number: int, brightness_level: float, color: list, duration: int = 1, gradual: bool = False):
-    if (DEBUG):
-        print(f'''
+    logging.debug(f'''
             light_number: {light_number}
             brightness_level: {brightness_level}
             color: {color}
@@ -19,13 +15,15 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
             gradual: {gradual}
             ''')
 
+    logging.info('Setting light...')
+
     if (gradual):
         clear()
         set_pixel(light_number, int(color[0]), int(color[1]), int(color[2]), 0.0)
         show()
 
         interval = duration / 10
-        print(f'Interval set to {interval} seconds.')
+        logging.info(f'Interval set to {interval} seconds.')
 
         for x in range(1, 10):
             x = round(x * 0.1, duration)
@@ -36,7 +34,7 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
         set_pixel(light_number, color[0], color[1], color[2], brightness=brightness_level)
         show()
 
-        print(f'Sleeping for {duration} seconds.')
+        logging.info(f'Sleeping for {duration} seconds.')
         sleep(duration)
 
 
@@ -50,4 +48,4 @@ if __name__ == '__main__':
             ,gradual = bool(argv[5]) if len(argv) == 6 else False 
         )
     else:
-        print('Usage: <script> [light number: 0-7] [brightness: 0.0-1.0] "[color: 0-256,0-256,0-256]" [duration: seconds] {Gradual: True|False}')
+        logging.warning('Usage: <script> [light number: 0-7] [brightness: 0.0-1.0] "[color: 0-256,0-256,0-256]" [duration: seconds] {Gradual: True|False}')
