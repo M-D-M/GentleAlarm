@@ -10,7 +10,7 @@ JSON config format:
 			,"0-255"
 		]
 		,"Intensity": "0.0-1.0"
-		,"Duration": "[integer: seconds]"
+		,"Duration": "[integer: minutes]"
 	}
 }
 ```
