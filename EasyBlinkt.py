@@ -34,7 +34,7 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
         # Create switch for number of steps here if duration > 10
 
-        number_of_steps = 100
+        number_of_steps = int(100 * brightness_level)
         interval = duration / number_of_steps
         logging.info(f'Interval set to {interval} seconds.')
 
@@ -43,7 +43,7 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
             logging.debug(f'Setting brightness to {x}')
             set_brightness(x)
             show()
-            sleep(interval)
+            # sleep(interval)
     else:
         set_pixel(light_number, color[0], color[1], color[2], brightness=brightness_level)
         show()
