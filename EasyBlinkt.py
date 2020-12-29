@@ -5,6 +5,16 @@ from sys import argv
 from time import sleep
 from blinkt import set_pixel, set_brightness, show, clear
 
+STEP_DICT = {
+    "short": {
+        "steps": 100
+        ,"multiplier": 0.01
+    }
+    ,"long": {
+        "steps": 10
+        ,"multiplier": 0.1
+    }
+}
 
 def setBlinktLight(light_number: int, brightness_level: float, color: list, duration: int = 1, gradual: bool = False):
     logging.debug(f'''
@@ -19,14 +29,17 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
     if (gradual):
         clear()
-        set_pixel(light_number, int(color[0]), int(color[1]), int(color[2]), 0.0)
+        set_pixel(light_number, color[0], color[1], color[2], 0.0)
         show()
 
-        interval = duration / 10
+        # Create switch for number of steps here if duration > 10
+
+        number_of_steps = 100
+        interval = duration / number_of_steps
         logging.info(f'Interval set to {interval} seconds.')
 
-        for x in range(1, 10):
-            x = round(x * 0.1, duration)
+        for x in range(1, number_of_steps):
+            x = round(x * 0.01, duration)
             logging.debug(f'Setting brightness to {x}')
             set_brightness(x)
             show()
