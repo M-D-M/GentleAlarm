@@ -27,6 +27,7 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
         for x in range(1, 10):
             x = round(x * 0.1, duration)
+            logging.debug(f'Setting brightness to {x}')
             set_brightness(x)
             show()
             sleep(interval)
@@ -39,13 +40,15 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level = logging.DEBUG)
+
     if (len(argv) >= 5):
         setBlinktLight(
             light_number = int(argv[1])
             ,brightness_level = float(argv[2])
             ,color = [int(color) for color in argv[3].split(',')]
             ,duration = int(argv[4]) if len(argv) >= 5 else 1
-            ,gradual = bool(argv[5]) if len(argv) == 6 else False 
+            ,gradual = True if (len(argv) == 6 and argv[5] == "True") else False 
         )
     else:
         logging.warning('Usage: <script> [light number: 0-7] [brightness: 0.0-1.0] "[color: 0-256,0-256,0-256]" [duration: seconds] {Gradual: True|False}')
