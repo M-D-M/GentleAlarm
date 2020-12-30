@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 DEBUG_FLAG = False
-LOGGING_FMT: str = '%(levelname)s [%(asctime)s] %(message)s'
 
 import json
 import os
@@ -10,6 +9,8 @@ import logging
 from datetime import datetime
 import EasyBlinkt
 
+LOGGING_FMT: str = '%(levelname)s [%(asctime)s] %(message)s'
+DEFAULT_LOG: str = f'{sys.argv[0]}.log'
 
 if DEBUG_FLAG:
     CURRENT_TIME = "0600"
@@ -18,17 +19,10 @@ else:
     CURRENT_TIME = datetime.now().strftime('%H%M')
     TIMEOUT_LENGTH = 43200
 
-logging.basicConfig(
-    level = logging.DEBUG if DEBUG_FLAG else logging.INFO
-    ,format = LOGGING_FMT
-)
-json_config_file = ''
-exit_code = 1
 
-
-def main():
+def main(json_file_location: str):
     exit_code = 1
-    with open(json_config_file) as f:
+    with open(json_file_location) as f:
         json_data = json.load(f)
 
     json_data = json_data.get(CURRENT_TIME, None)
@@ -53,10 +47,29 @@ def main():
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) > 1):
+    exit_code = 1
+
+    if (len(sys.argv) >= 1):
+
+        logging_dict = {
+            'level': logging.DEBUG if DEBUG_FLAG else logging.INFO
+            ,'format': LOGGING_FMT
+            ,'filename': DEFAULT_LOG
+        }
+
+        if (len(sys.argv) > 2):
+            if os.access(sys.argv[2], os.W_OK):
+                print(f'Outputting log data to {sys.argv[2]}')
+                logging_dict.update({
+                    'filename': sys.argv[2]
+                })
+            else:
+                print(f'Unable to write to logfile location {sys.argv[2]}! Using default logfile {DEFAULT_LOG}.')
+
+        logging.basicConfig(**logging_dict)
+
         if (os.path.isfile(sys.argv[1])):
-            json_config_file = sys.argv[1]
-            exit_code = main()
+            exit_code = main(json_file_location = sys.argv[1])
         else:
             logging.critical(f"Unfortunately, \"{sys.argv[1]}\" isn't a valid json file.  I'm sorry!")
     else:
