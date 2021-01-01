@@ -8,23 +8,54 @@ from blinkt import set_pixel, set_brightness, show, clear
 
 LIGHT_IN_USE_VAR="BLINKT_LIGHTS_IN_USE"
 STEP_DICT = {
-    "short": {
+    "long": {
         "steps": 100
         ,"multiplier": 0.01
     }
-    ,"long": {
+    ,"short": {
         "steps": 10
         ,"multiplier": 0.1
     }
 }
 
-'''
-def (light_number: int):
-    if (not os.environ.get(LIGHT_IN_USE_VAR))
-    lights_in_use = [int(light) for light in os.environ['BLINKT_LIGHTS_IN_USE'].split('|')]
+
+def getLightsInUse():
+    lights_in_use_list = []
+
+    if (os.environ.get(LIGHT_IN_USE_VAR)):
+        logging.debug(f"Lights-in-use Environment variable: {os.environ['BLINKT_LIGHTS_IN_USE']}")
+        lights_in_use_list = [int(light) for light in os.environ['BLINKT_LIGHTS_IN_USE'].split('|')]
+
+    return lights_in_use_list
+
+
+def setLightsInUse(lights_in_use_list: list):
+    try:
+        os.environ[LIGHT_IN_USE_VAR] = '|'.join([str(light) for light in lights_in_use_list])
+        logging.debug(f"Lights-in-use Environment variable: {os.environ['BLINKT_LIGHTS_IN_USE']}")
+    except:
+        raise
+
+
+def tryToToggleLightInUse(light_number: int, send_power_to_light: bool):
+    lights_in_use = getLightsInUse()
     
-    if light_number in lights_in_use:
-'''
+    # If we want to turn on the light, but the light is already in use
+    if (send_power_to_light and light_number in lights_in_use):
+        raise "Cannot turn on light becuase light is already in use!"
+
+    # If we want to turn off the light
+    elif (not send_power_to_light and light_number in lights_in_use):
+        logging.debug(f'Marking light {light_number} as no longer in use.')
+        lights_in_use.remove(light_number)
+
+    # If we want to turn on the light, and the light is not in use
+    else:
+        logging.debug(f'Marking light {light_number} as in use.')
+        lights_in_use.append(light_number)
+
+    setLightsInUse(lights_in_use)
+
 
 def setBlinktLight(light_number: int, brightness_level: float, color: list, duration: int = 1, gradual: bool = False):
     logging.debug(f'''
@@ -38,31 +69,49 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
     logging.info('Setting light...')
 
     try:
-        if (gradual):
-            # Create switch for number of steps here if duration > 10
+        tryToToggleLightInUse(light_number = light_number, send_power_to_light = True)
 
-            number_of_steps = int(100 * brightness_level)
-            interval = duration / number_of_steps
-            logging.info(f'Interval set to {interval} seconds.')
+        try:
+            if (gradual):
+                # Switch for number of steps here if duration > 10
+                interval_config = 'short'
+                if (duration > 10):
+                    interval_config = 'long'
 
-            for x in range(1, number_of_steps):
-                x = round(x * 0.01, duration)
-                logging.debug(f'Setting brightness to {x}')
-                set_pixel(light_number, color[0], color[1], color[2], x)
+                steps = STEP_DICT[interval_config]['steps']
+                multiplier = STEP_DICT[interval_config]['multiplier']
+
+                # Set variables for gradual light change
+                number_of_steps = int(steps * brightness_level)
+                interval = duration / number_of_steps
+                logging.info(f'Interval set to {interval} seconds.')
+
+                # Begin slowly increasing light intensity
+                for x in range(1, number_of_steps):
+                    x = round(x * multiplier, duration)
+                    logging.debug(f'Setting brightness to {x}')
+                    set_pixel(light_number, color[0], color[1], color[2], x)
+                    show()
+                    logging.info(f'Sleeping for {interval} seconds')
+                    sleep(interval)
+            else:
+                # Immediately set light intensity
+                set_pixel(light_number, color[0], color[1], color[2], brightness=brightness_level)
                 show()
-                logging.info(f'Sleeping for {interval} seconds')
-                sleep(interval)
-        else:
-            set_pixel(light_number, color[0], color[1], color[2], brightness=brightness_level)
-            show()
 
-            logging.info(f'Sleeping for {duration} seconds.')
-            sleep(duration)
+                logging.info(f'Sleeping for {duration} seconds.')
+                sleep(duration)
+        except:
+            logging.exception(f'Exception while trying to interact with blinkt subsystem!')
+
+        logging.info('Clearing light...')
+        set_pixel(light_number, 0, 0, 0, 0)
+
+        tryToToggleLightInUse(light_number = light_number, send_power_to_light = False)
     except:
-        logging.exception(f'Exception while trying to set light!')
-
-    logging.info('Clearing light...')
-    set_pixel(light_number, 0, 0, 0, 0)
+        logging.exception('Exception while trying to set or clear light!')
+        raise
+        
 
 
 if __name__ == '__main__':
