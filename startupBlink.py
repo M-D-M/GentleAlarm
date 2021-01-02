@@ -37,11 +37,13 @@ while continue_blinking:
     if (current_duration > BLINK_DURATION):
         continue_blinking = False
 
+clear()
+
 for x in range(8):
     EasyBlinkt.setBlinktLight(
         light_number = x
         ,brightness_level = 0.1
         ,color = [54, 43, 11]
-        ,duration = 1
-        ,gradual = True
+        ,duration = 0.2
+        ,gradual = False
     )
