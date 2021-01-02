@@ -2,11 +2,12 @@
 
 import logging
 import os
+import tempfile
 from sys import argv
 from time import sleep
 from blinkt import set_pixel, set_brightness, show, clear
 
-LIGHT_IN_USE_VAR="BLINKT_LIGHTS_IN_USE"
+STATE_FILE = os.path.join(tempfile.gettempdir(), 'GentleAlarm_State.json')
 STEP_DICT = {
     "long": {
         "steps": 100
@@ -22,17 +23,21 @@ STEP_DICT = {
 def getLightsInUse():
     lights_in_use_list = []
 
-    if (os.environ.get(LIGHT_IN_USE_VAR)):
-        logging.debug(f"Lights-in-use Environment variable: {os.environ['BLINKT_LIGHTS_IN_USE']}")
-        lights_in_use_list = [int(light) for light in os.environ['BLINKT_LIGHTS_IN_USE'].split('|')]
+    if os.path.exists(STATE_FILE):
+        with open(file = STATE_FILE, mode = 'r') as state_file:
+            state_file_data = state_file.read()
+            logging.debug(f'State file data: "{state_file_data}"')
+
+            if (state_file_data is not ""):
+                lights_in_use_list = [int(light) for light in state_file_data.split('|')]
 
     return lights_in_use_list
 
 
 def setLightsInUse(lights_in_use_list: list):
     try:
-        os.environ[LIGHT_IN_USE_VAR] = '|'.join([str(light) for light in lights_in_use_list])
-        logging.debug(f"Lights-in-use Environment variable: {os.environ['BLINKT_LIGHTS_IN_USE']}")
+        with open(file = STATE_FILE, mode = 'w') as state_file:
+            state_file.write('|'.join([str(light) for light in lights_in_use_list]))
     except:
         raise
 
@@ -42,7 +47,7 @@ def tryToToggleLightInUse(light_number: int, send_power_to_light: bool):
     
     # If we want to turn on the light, but the light is already in use
     if (send_power_to_light and light_number in lights_in_use):
-        raise "Cannot turn on light becuase light is already in use!"
+        raise ValueError("Cannot turn on light becuase light is already in use!")
 
     # If we want to turn off the light
     elif (not send_power_to_light and light_number in lights_in_use):
@@ -80,6 +85,8 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
                 steps = STEP_DICT[interval_config]['steps']
                 multiplier = STEP_DICT[interval_config]['multiplier']
+
+                logging.debug(f'Number of steps: {steps} -- multiplier: {multiplier}')
 
                 # Set variables for gradual light change
                 number_of_steps = int(steps * brightness_level)
