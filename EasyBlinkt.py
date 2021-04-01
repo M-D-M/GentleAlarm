@@ -7,6 +7,7 @@ from sys import argv
 from time import sleep
 from blinkt import set_pixel, set_brightness, show, clear
 
+DEBUG = True
 STATE_FILE = os.path.join(tempfile.gettempdir(), 'GentleAlarm_State.json')
 STEP_DICT = {
     "long": {
@@ -122,7 +123,7 @@ def setBlinktLight(light_number: int, brightness_level: float, color: list, dura
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level = logging.DEBUG)
+    logging.basicConfig(level = logging.DEBUG if DEBUG else logging.INFO)
 
     if (len(argv) >= 5):
         setBlinktLight(

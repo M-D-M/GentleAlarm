@@ -1,0 +1,4 @@
+flask
+pyotp==2.6.0
+qrcode==6.1
+Pillow
