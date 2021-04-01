@@ -2,3 +2,5 @@ __pycache__/
 .vscode
 *.swp
 GentleAlarm.json
+*.key
+*.log
