@@ -58,7 +58,7 @@ if __name__ == '__main__':
         }
 
         if (len(sys.argv) > 2):
-            if os.access(sys.argv[2], os.W_OK):
+            if os.path.isdir(os.path.dirname(sys.argv[2])):
                 print(f'Outputting log data to {sys.argv[2]}')
                 logging_dict.update({
                     'filename': sys.argv[2]
